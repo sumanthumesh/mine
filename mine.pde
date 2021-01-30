@@ -39,6 +39,8 @@ class Grid
 
   boolean startGame;
   boolean gameOver;
+  boolean gameWin;
+  int openCount;
   
   int startTime,endTime,elapsed;
   
@@ -54,6 +56,7 @@ class Grid
   {
     startGame =true;
     gameOver = false;
+    gameWin = false;
     size=s;
     x_offset = 0;
     y_offset = 40;
@@ -94,6 +97,8 @@ class Grid
     topScreen();
     if(gameOver == true)
       gameOverScreen();
+    else if(gameWin == true)
+      gameWinScreen();
     cursorR = (mouseY-y_offset)/size;
     cursorC = (mouseX-x_offset)/size;
     rectMode(CORNER);
@@ -201,7 +206,10 @@ class Grid
     if(F[cursorR][cursorC].flag != 1 && F[cursorR][cursorC].bomb != 1)
       F[cursorR][cursorC].open = 1;
     if(F[cursorR][cursorC].bomb == 1)
+    {
       gameOver = true;
+      gameOverScreen();
+    }
     Pair<Integer,Integer> cursorP = new Pair<Integer,Integer>(cursorR,cursorC);
     Stack<Pair<Integer,Integer>> S = new Stack<Pair<Integer,Integer>>();
     if(F[cursorR][cursorC].vicinity == 0 && F[cursorR][cursorC].flag!=1)
@@ -235,6 +243,7 @@ class Grid
         //print("Popped(" + temp.getKey() + "," + temp.getValue() + ")\n");
       }
     }
+    checkOpenCount();
   }
   
   Pair<Integer,Integer> zeroInVicinity(Pair<Integer,Integer> P)
@@ -325,6 +334,13 @@ class Grid
       text("Game Over, Press 'R' to reset",int(windowWidth/2+x_offset),int(y_offset/2));
   }
 
+  void gameWinScreen()
+  {
+      textAlign(CENTER,CENTER);
+      fill(bombColor);
+      text("Victory! Press 'R' to reset",int(windowWidth/2+x_offset),int(y_offset/2));
+  }
+
   void flagScreen()
   {
     textAlign(LEFT,CENTER);
@@ -346,7 +362,7 @@ class Grid
   void timeScreen()
   {
     endTime = (hour() * 3600) + (minute() * 60) + (second());
-    if(gameOver != true)
+    if(gameOver != true && gameWin != true)
       elapsed = endTime - startTime;
     int elapsedH = int(elapsed/3600);
     elapsed %= 3600;
@@ -366,6 +382,17 @@ class Grid
   {
     startTime = (hour() * 3600) + (minute() * 60) + (second());
     startGame = false;
+  }
+  
+  void checkOpenCount()
+  {
+    openCount = 0;
+    for(int r=0;r<numRows;r++)
+      for(int c=0;c<numCols;c++)
+          openCount += F[r][c].open;
+    if((openCount + numBombs) == (numRows * numCols))
+      gameWin = true;
+    print("Open count:" + openCount + "\n");
   }
 };
 
