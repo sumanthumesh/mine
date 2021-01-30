@@ -80,7 +80,7 @@ class Grid
       if(F[tempr][tempc].bomb != 1)
       {
         F[tempr][tempc].bomb = 1;
-        print("R:" + tempr + " C:" + tempc + "\n");
+        //print("R:" + tempr + " C:" + tempc + "\n");
         count++;
       }
     }
@@ -169,6 +169,11 @@ class Grid
       F[cursorR][cursorC].flag=1;
       numFlags--;
     }
+    else if(numFlags >= 0 && F[cursorR][cursorC].flag == 1)
+    {
+      F[cursorR][cursorC].flag=0;
+      numFlags++;
+    }
   }
   
   void openSurrounding(int r,int c)
@@ -193,7 +198,7 @@ class Grid
   
   void clickOpen()
   {
-    if(F[cursorR][cursorC].flag != 1)
+    if(F[cursorR][cursorC].flag != 1 && F[cursorR][cursorC].bomb != 1)
       F[cursorR][cursorC].open = 1;
     if(F[cursorR][cursorC].bomb == 1)
       gameOver = true;
@@ -203,7 +208,7 @@ class Grid
     {
       openSurrounding(cursorR,cursorC);
       Pair<Integer,Integer> nearby = zeroInVicinity(cursorP);
-      print("Nearby(" + nearby.getKey() + "," + nearby.getValue() + ")\n");
+      //print("Nearby(" + nearby.getKey() + "," + nearby.getValue() + ")\n");
       S.push(cursorP);
     }
     Pair<Integer,Integer> currentP;
@@ -217,17 +222,17 @@ class Grid
         openSurrounding(r,c);
       
       Pair<Integer,Integer> nearby = zeroInVicinity(currentP);
-      print("Current(" + currentP.getKey() + "," + currentP.getValue() + ")\n");
+      //print("Current(" + currentP.getKey() + "," + currentP.getValue() + ")\n");
       
       if((nearby.getKey() != -1) && (nearby.getValue() != -1) && S.search(nearby) == -1)
       {
-        print("Pushed(" + nearby.getKey() + "," + nearby.getValue() + ")\n");
+        //print("Pushed(" + nearby.getKey() + "," + nearby.getValue() + ")\n");
         S.push(nearby);
       }
       else
       {
         Pair temp = S.pop();
-        print("Popped(" + temp.getKey() + "," + temp.getValue() + ")\n");
+        //print("Popped(" + temp.getKey() + "," + temp.getValue() + ")\n");
       }
     }
   }
