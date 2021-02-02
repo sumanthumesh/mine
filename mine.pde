@@ -397,17 +397,19 @@ class Grid
 };
 
 Grid obj;
+Solver Sol;
 
 void setup()
 {
   size(1280,720);
   obj = new Grid(80,1280,640);
+  Sol = new Solver(obj);
 }
 
 void draw()
 {
   obj.draw();
-  print("Framerate:" + frameRate + "\n");
+  //print("Framerate:" + frameRate + "\n");
 }
 
 void mouseClicked()
@@ -424,4 +426,6 @@ void keyPressed()
 {
   if(key == 'r')
     setup();
+  if(key == 'h')
+    print(Sol.findPofE(obj.cursorR,obj.cursorC)+"\n");
 }
