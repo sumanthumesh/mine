@@ -392,7 +392,7 @@ class Grid
           openCount += F[r][c].open;
     if((openCount + numBombs) == (numRows * numCols))
       gameWin = true;
-    print("Open count:" + openCount + "\n");
+    //print("Open count:" + openCount + "\n");
   }
 };
 
@@ -401,13 +401,13 @@ Grid obj;
 void setup()
 {
   size(1280,720);
-  obj = new Grid(40,1280,680);
+  obj = new Grid(80,1280,640);
 }
 
 void draw()
 {
   obj.draw();
-  //print("R:" + obj.numRows + " C:" + obj.numCols + "\n");
+  print("Framerate:" + frameRate + "\n");
 }
 
 void mouseClicked()
