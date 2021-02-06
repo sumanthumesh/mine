@@ -409,6 +409,7 @@ void setup()
 void draw()
 {
   obj.draw();
+  Sol.draw();
   //print("Framerate:" + frameRate + "\n");
 }
 
@@ -427,5 +428,7 @@ void keyPressed()
   if(key == 'r')
     setup();
   if(key == 'h')
-    print(Sol.findPofE(obj.cursorR,obj.cursorC)+"\n");
+    Sol.getHint();
+    //print("(" + Sol.findLeastPofE().getKey() + "," + Sol.findLeastPofE().getValue() + ")\n");
+    //print(Sol.findPofE(obj.cursorR,obj.cursorC)+"\n");
 }
