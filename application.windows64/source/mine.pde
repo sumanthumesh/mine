@@ -392,22 +392,25 @@ class Grid
           openCount += F[r][c].open;
     if((openCount + numBombs) == (numRows * numCols))
       gameWin = true;
-    print("Open count:" + openCount + "\n");
+    //print("Open count:" + openCount + "\n");
   }
 };
 
 Grid obj;
+Solver Sol;
 
 void setup()
 {
   size(1280,720);
-  obj = new Grid(40,1280,680);
+  obj = new Grid(80,1280,640);
+  Sol = new Solver(obj);
 }
 
 void draw()
 {
   obj.draw();
-  //print("R:" + obj.numRows + " C:" + obj.numCols + "\n");
+  Sol.draw();
+  //print("Framerate:" + frameRate + "\n");
 }
 
 void mouseClicked()
@@ -424,4 +427,8 @@ void keyPressed()
 {
   if(key == 'r')
     setup();
+  if(key == 'h')
+    Sol.getHint();
+    //print("(" + Sol.findLeastPofE().getKey() + "," + Sol.findLeastPofE().getValue() + ")\n");
+    //print(Sol.findPofE(obj.cursorR,obj.cursorC)+"\n");
 }

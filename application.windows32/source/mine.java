@@ -5,6 +5,8 @@ import processing.opengl.*;
 
 import java.util.Stack; 
 import javafx.util.Pair; 
+import java.util.Stack; 
+import javafx.util.Pair; 
 
 import java.util.HashMap; 
 import java.util.ArrayList; 
@@ -411,22 +413,25 @@ class Grid
           openCount += F[r][c].open;
     if((openCount + numBombs) == (numRows * numCols))
       gameWin = true;
-    print("Open count:" + openCount + "\n");
+    //print("Open count:" + openCount + "\n");
   }
 };
 
 Grid obj;
+Solver Sol;
 
 public void setup()
 {
   
-  obj = new Grid(40,1280,680);
+  obj = new Grid(80,1280,640);
+  Sol = new Solver(obj);
 }
 
 public void draw()
 {
   obj.draw();
-  //print("R:" + obj.numRows + " C:" + obj.numCols + "\n");
+  Sol.draw();
+  //print("Framerate:" + frameRate + "\n");
 }
 
 public void mouseClicked()
@@ -443,7 +448,273 @@ public void keyPressed()
 {
   if(key == 'r')
     setup();
+  if(key == 'h')
+    Sol.getHint();
+    //print("(" + Sol.findLeastPofE().getKey() + "," + Sol.findLeastPofE().getValue() + ")\n");
+    //print(Sol.findPofE(obj.cursorR,obj.cursorC)+"\n");
 }
+
+
+
+class Solver
+{
+  float[][] prob;
+  int numRows,numCols;
+  Grid G;
+  int hint_status,hint_r,hint_c;
+  
+  int red =  0xffff0000;
+  int green = 0xff00ff00;
+  int yellow = 0xffffff00;
+  
+  Solver(Grid g)
+  {
+    G = g;
+    numRows = G.numRows;
+    numCols = G.numCols;
+    prob = new float[numRows][numCols];
+    hint_status = 0;
+  }
+  
+  public float findContribution(int r,int c)
+  {
+    if(G.F[r][c].open == 0 || G.F[r][c].flag == 1)
+      return -1;
+    //G = g;
+    int num_candidates = 0,num_flags = 0;
+    if(c != 0)
+    {
+      if(G.F[r][c-1].open == 0)
+      num_candidates++;
+      if(G.F[r][c-1].flag == 1)
+      num_flags++;
+    }
+    if(c != numCols - 1)
+    {
+      if(G.F[r][c+1].open == 0)
+      num_candidates++;
+      if(G.F[r][c+1].flag == 1)
+      num_flags++;
+    }
+    if(r != 0)
+    {
+      if(G.F[r-1][c].open == 0)
+      num_candidates++;
+      if(G.F[r-1][c].flag == 1)
+      num_flags++;
+    }
+    if(r != numRows - 1)
+    {
+      if(G.F[r+1][c].open == 0)
+      num_candidates++;
+      if(G.F[r+1][c].flag == 1)
+      num_flags++;
+    }
+    if((r != 0) && (c != 0))
+    {
+      if(G.F[r-1][c-1].open == 0)
+      num_candidates++;
+      if(G.F[r-1][c-1].flag == 1)
+      num_flags++;
+    }
+    if((r != 0) && (c != numCols - 1))
+    {
+      if(G.F[r-1][c+1].open == 0)
+      num_candidates++;
+      if(G.F[r-1][c+1].flag == 1)
+      num_flags++;
+    }
+    if((r != numRows - 1) && (c != 0))
+    {
+      if(G.F[r+1][c-1].open == 0)
+      num_candidates++;
+      if(G.F[r+1][c-1].flag == 1)
+      num_flags++;
+    }
+    if((r != numRows - 1) && (c != numCols - 1))
+    {
+      if(G.F[r+1][c+1].open == 0)
+      num_candidates++;
+      if(G.F[r+1][c+1].flag == 1)
+      num_flags++;
+    }
+    //print("Candidates:"+num_candidates+"\n");
+    //print("Flags:"+num_flags+"\n");
+    //print("Vicinity:"+G.F[r][c].vicinity+"\n");
+    if((num_candidates-num_flags)==0)
+      return -1;
+    return PApplet.parseFloat((G.F[r][c].vicinity-num_flags))/PApplet.parseFloat((num_candidates-num_flags));
+  }
+  
+  public float findPofE(int r,int c)
+  {
+    if(G.F[r][c].flag == 1)
+      return 2;
+    float highest_prob = -1;
+    if(c != 0)
+    {
+      if(findContribution(r,c-1) > highest_prob)
+      highest_prob = findContribution(r,c-1);
+      if(findContribution(r,c-1) == 0)
+      return 0;  
+    }
+    if(c != numCols - 1)
+    {
+      if(findContribution(r,c+1) > highest_prob)
+      highest_prob = findContribution(r,c+1);
+      if(findContribution(r,c+1) == 0)
+      return 0;  ;
+    }
+    if(r != 0)
+    {
+      if(findContribution(r-1,c) > highest_prob)
+      highest_prob = findContribution(r-1,c);
+      if(findContribution(r-1,c) == 0)
+      return 0;  
+    }
+    if(r != numRows - 1)
+    {
+      if(findContribution(r+1,c) > highest_prob)
+      highest_prob = findContribution(r+1,c);
+      if(findContribution(r+1,c) == 0)
+      return 0;  
+    }
+    if((r != 0) && (c != 0))
+    {
+      if(findContribution(r-1,c-1) > highest_prob)
+      highest_prob = findContribution(r-1,c-1);
+      if(findContribution(r-1,c-1) == 0)
+      return 0;   
+    }
+    if((r != 0) && (c != numCols - 1))
+    {
+      if(findContribution(r-1,c+1) > highest_prob)
+      highest_prob = findContribution(r-1,c+1);
+      if(findContribution(r-1,c+1) == 0)
+      return 0;  
+    }
+    if((r != numRows - 1) && (c != 0))
+    {
+      if(findContribution(r+1,c-1) > highest_prob)
+      highest_prob = findContribution(r+1,c-1);
+      if(findContribution(r+1,c-1) == 0)
+      return 0;  
+    }
+    if((r != numRows - 1) && (c != numCols - 1))
+    {
+      if(findContribution(r+1,c+1) > highest_prob)
+      highest_prob = findContribution(r+1,c+1);
+      if(findContribution(r+1,c+1) == 0)
+      return 0;  
+    }
+    if(highest_prob == -1)
+      return 2;
+    return highest_prob;
+  }
+  
+  public Pair<Integer,Integer> findLeastPofE()
+  {
+    float least_prob = 2;
+    Pair<Integer,Integer> P = new Pair<Integer,Integer>(0,0);
+    
+    for(int r = 0; r < numRows; r++)
+    {
+      for(int c = 0;c < numCols; c++)
+      {
+        if(G.F[r][c].flag != 1 && G.F[r][c].open == 0)
+        {
+          if(findPofE(r,c) == 0)
+          {
+            P = new Pair<Integer,Integer>(r,c);
+            return P;
+          }
+          if(findPofE(r,c)<least_prob)
+          {
+            P = new Pair<Integer,Integer>(r,c);
+            least_prob = findPofE(r,c);
+          }
+        }
+      }
+    }
+    return P;
+  }
+  
+  public Pair<Integer,Integer> findBomb()
+  {
+    Pair<Integer,Integer> P =new Pair<Integer,Integer>(-1,-1);
+    for(int r=0;r<numRows;r++)
+    {
+      for(int c=0;c<numCols;c++)
+      {
+        if(G.F[r][c].flag==0 && G.F[r][c].open == 0 && findPofE(r,c) == 1)
+        {
+          P = new Pair<Integer,Integer>(r,c);
+          return P;
+        }
+      }  
+    }
+    return P;
+  }
+  
+  public void highlightRed(int r,int c)
+  {
+    fill(red);
+    circle(G.x_offset+c*G.size+G.size/2,G.y_offset+r*G.size+G.size/2,G.size/2);
+  }
+  
+  public void highlightGreen(int r,int c)
+  {
+    fill(green);
+    circle(G.x_offset+c*G.size+G.size/2,G.y_offset+r*G.size+G.size/2,G.size/2);
+  }
+  
+  public void highlightYellow(int r,int c)
+  {
+    fill(yellow);
+    circle(G.x_offset+c*G.size+G.size/2,G.y_offset+r*G.size+G.size/2,G.size/2);
+  }
+   
+  
+  public void getHint()
+  {
+    Pair<Integer,Integer> P = findBomb();
+    Pair<Integer,Integer> Q = findLeastPofE();
+    if(P.getKey() != -1 || P.getValue() != -1)
+    {
+      hint_status =1;
+      hint_r = P.getKey();
+      hint_c = P.getValue();
+      print("Red: " + hint_r + hint_c + "\n");
+    }
+    else if(findPofE(Q.getKey(),Q.getValue())==0)
+    {
+      hint_status =2;
+      hint_r = Q.getKey();
+      hint_c = Q.getValue();
+      print("Green: " + hint_r + hint_c + "\n");
+    }
+    else 
+    {
+      hint_status =3;
+      hint_r = Q.getKey();
+      hint_c = Q.getValue();
+      print("Yellow: " + hint_r + hint_c + "\n");
+    }
+  }
+  
+  public void draw()
+  {
+    if(keyPressed == true){
+    if(hint_status == 1)
+      highlightRed(hint_r,hint_c);
+    else if(hint_status == 2)
+      highlightGreen(hint_r,hint_c); 
+    else if(hint_status == 3)
+      highlightYellow(hint_r,hint_c);
+    }
+    //hint_status = 0;
+  }
+};
   public void settings() {  size(1280,720); }
   static public void main(String[] passedArgs) {
     String[] appletArgs = new String[] { "mine" };
