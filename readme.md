@@ -7,6 +7,15 @@
 |Left click|Open minefield|
 |Right click|Place flag|
 |'R'|Reset board|
+|'H'|Get Hint|
+
+### Hint legend
+|Color|Indication|
+|------|--------|
+|Red|Place flag|
+|Green|Safe to open|
+|Yellow|Block with least probability of exploding|
+
 
 ### Running the game
 The game can be run following either of the following methods:
